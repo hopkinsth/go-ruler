@@ -3,12 +3,71 @@ package ruler
 import "testing"
 
 func TestPluck(t *testing.T) {
-	o := make(map[string]interface{})
-	o["hey"] = make(map[string]interface{})
-	o["hey"].(map[string]interface{})["hello"] = "bob"
+	exps := []struct {
+		o       map[string]interface{}
+		seeking string
+		value   interface{}
+	}{
+		// test extracting a simple property
+		{
+			map[string]interface{}{
+				"hey": map[string]interface{}{
+					"hello": "bob",
+				},
+			},
+			"hey.hello",
+			"bob",
+		},
+		// test getting a nonexistent property
+		// on an existing object
+		{
+			map[string]interface{}{
+				"hey": map[string]interface{}{
+					"hello": "bob",
+				},
+			},
+			"hey.nope",
+			nil,
+		},
+		//test getting a nonexistent property
+		//for a nonexistent object
+		{
+			map[string]interface{}{
+				"hey": map[string]interface{}{
+					"hello": "bob",
+				},
+			},
+			"hey.what.something.very.important",
+			nil,
+		},
+		//test getting a property on a thing
+		//that isn't or doesn't assert to be a map
+		{
+			map[string]interface{}{
+				"hey": map[string]interface{}{
+					"hello": "bob",
+				},
+			},
+			"hey.hello.something.very.important",
+			nil,
+		},
+		//test plucking something that isn't
+		//a string
+		{
+			map[string]interface{}{
+				"hey": map[string]interface{}{
+					"sup": 1,
+				},
+			},
+			"hey.sup",
+			1,
+		},
+	}
 
-	r := pluck(o, "hey.hello")
-	if r != "bob" {
-		t.Error("didn't pluck properly!")
+	for _, e := range exps {
+		res := pluck(e.o, e.seeking)
+		if res != e.value {
+			t.Error("failed to pluck!")
+		}
 	}
 }

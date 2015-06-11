@@ -51,8 +51,10 @@ func pluck(o map[string]interface{}, path string) interface{} {
 				// didn't find the property, it's missing
 				return nil
 			}
-
-			prev = prev[cp].(map[string]interface{})
+			var ok bool
+			if prev, ok = prev[cp].(map[string]interface{}); !ok {
+				return nil
+			}
 		}
 
 		if prev[parts[len(parts)-1]] != nil {
