@@ -7,8 +7,9 @@ func TestPluck(t *testing.T) {
 		o       map[string]interface{}
 		seeking string
 		value   interface{}
+		name    string
 	}{
-		// test extracting a simple property
+
 		{
 			map[string]interface{}{
 				"hey": map[string]interface{}{
@@ -17,9 +18,9 @@ func TestPluck(t *testing.T) {
 			},
 			"hey.hello",
 			"bob",
+			`test extracting a simple property`,
 		},
-		// test getting a nonexistent property
-		// on an existing object
+
 		{
 			map[string]interface{}{
 				"hey": map[string]interface{}{
@@ -28,9 +29,9 @@ func TestPluck(t *testing.T) {
 			},
 			"hey.nope",
 			nil,
+			`test getting a nonexistent property
+			on an existing object`,
 		},
-		//test getting a nonexistent property
-		//for a nonexistent object
 		{
 			map[string]interface{}{
 				"hey": map[string]interface{}{
@@ -39,9 +40,9 @@ func TestPluck(t *testing.T) {
 			},
 			"hey.what.something.very.important",
 			nil,
+			`test getting a nonexistent property
+			for a nonexistent object`,
 		},
-		//test getting a property on a thing
-		//that isn't or doesn't assert to be a map
 		{
 			map[string]interface{}{
 				"hey": map[string]interface{}{
@@ -50,9 +51,10 @@ func TestPluck(t *testing.T) {
 			},
 			"hey.hello.something.very.important",
 			nil,
+			`test getting a property on a thing
+			that isn't or doesn't assert to be a map`,
 		},
-		//test plucking something that isn't
-		//a string
+
 		{
 			map[string]interface{}{
 				"hey": map[string]interface{}{
@@ -61,20 +63,26 @@ func TestPluck(t *testing.T) {
 			},
 			"hey.sup",
 			1,
+			`test plucking something that isn't
+			a string`,
 		},
-		//test plucking where
-		//the base obj doesn't exist
 		{
 			map[string]interface{}{},
 			"hey.lol",
 			nil,
+			`test plucking where the base obj doesn't exist`,
 		},
 	}
 
 	for _, e := range exps {
 		res := pluck(e.o, e.seeking)
 		if res != e.value {
-			t.Error("failed to pluck!")
+			t.Errorf(
+				"error with: %s\nfailed to pluck! %s != %s",
+				e.name,
+				res,
+				e.value,
+			)
 		}
 	}
 }
