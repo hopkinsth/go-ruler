@@ -1,8 +1,6 @@
 package ruler
 
 import (
-	_ "reflect"
-	_ "regexp"
 	"strings"
 )
 
@@ -16,17 +14,23 @@ type Rule struct {
 	filters []*Filter
 }
 
-// func (r *Rule) Test(o map[string]interface{}) bool {
-// 	for _, f := range r.filters {
-// 		val := pluck(o, f.Path)
-// 		rtype := reflect.TypeOf(f.Value)
-// 		atype := reflect.Type(val)
+func (r *Rule) Test(o map[string]interface{}) bool {
+	for _, f := range r.filters {
+		val := pluck(o, f.Path)
 
-// 		if rtype.Name() != atype.Name() {
+		switch f.Comparator {
+		case "eq":
+			return f.Value == val
+		default:
+			//should probably return an error or something
+			//but this is good for now
+			//if comparator is not implemented, return false
+			return false
+		}
+	}
 
-// 		}
-// 	}
-// }
+	return false
+}
 
 // given a map, pull a property from it at some deeply nested depth
 // this reimplements JS `pluck` in go: https://github.com/gjohnson/pluck

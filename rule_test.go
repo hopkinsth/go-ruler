@@ -2,6 +2,44 @@ package ruler
 
 import "testing"
 
+func TestRules(t *testing.T) {
+
+	cases := []struct {
+		filters []*Filter
+		o       map[string]interface{}
+		name    string
+	}{
+		{
+			[]*Filter{
+				&Filter{
+					"eq",
+					"basic.property",
+					"foobar",
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": "foobar",
+				},
+			},
+			"testing basic property equality (string)",
+		},
+	}
+
+	for _, c := range cases {
+		r := &Rule{
+			filters: c.filters,
+		}
+
+		if !r.Test(c.o) {
+			t.Errorf("rule test failed! %s\n filters: %s",
+				c.name,
+				c.filters,
+			)
+		}
+	}
+}
+
 func TestPluck(t *testing.T) {
 	exps := []struct {
 		o       map[string]interface{}
