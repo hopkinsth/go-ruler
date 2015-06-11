@@ -39,8 +39,11 @@ func pluck(o map[string]interface{}, path string) interface{} {
 		return o[parts[0]]
 	} else if len(parts) > 1 && o[parts[0]] != nil {
 		var prev map[string]interface{}
-
-		prev = o[parts[0]].(map[string]interface{})
+		var ok bool
+		if prev, ok = o[parts[0]].(map[string]interface{}); !ok {
+			// not an object type! ...or a map, yeah, that.
+			return nil
+		}
 
 		for i := 1; i < len(parts)-1; i += 1 {
 			// we need to check the existence of another

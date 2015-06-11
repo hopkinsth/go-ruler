@@ -62,6 +62,13 @@ func TestPluck(t *testing.T) {
 			"hey.sup",
 			1,
 		},
+		//test plucking where
+		//the base obj doesn't exist
+		{
+			map[string]interface{}{},
+			"hey.lol",
+			nil,
+		},
 	}
 
 	for _, e := range exps {
