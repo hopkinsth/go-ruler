@@ -72,6 +72,28 @@ func TestPluck(t *testing.T) {
 			nil,
 			`test plucking where the base obj doesn't exist`,
 		},
+		{
+			map[string]interface{}{
+				"test": map[string]interface{}{
+					"thing": map[string]interface{}{
+						"here": map[string]interface{}{
+							"today": map[string]interface{}{
+								"is": map[string]interface{}{
+									"awesome": map[string]interface{}{
+										"with": map[string]interface{}{
+											"thestuff": "no dice",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"test.thing.here.today.is.awesome.with.thestuff",
+			"no dice",
+			"testing deeply nested property",
+		},
 	}
 
 	for _, e := range exps {
@@ -83,6 +105,48 @@ func TestPluck(t *testing.T) {
 				res,
 				e.value,
 			)
+		}
+	}
+}
+
+func BenchmarkPluckShallow(b *testing.B) {
+	o := map[string]interface{}{
+		"hey": map[string]interface{}{
+			"there": 4,
+		},
+	}
+
+	for i := 0; i < b.N; i += 1 {
+		r := pluck(o, "hey.there")
+		if r != 4 {
+			b.Errorf("fail bench, val was %s", r)
+		}
+	}
+}
+
+func BenchmarkPluckDeep(b *testing.B) {
+	o := map[string]interface{}{
+		"test": map[string]interface{}{
+			"thing": map[string]interface{}{
+				"here": map[string]interface{}{
+					"today": map[string]interface{}{
+						"is": map[string]interface{}{
+							"awesome": map[string]interface{}{
+								"with": map[string]interface{}{
+									"thestuff": "no dice",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for i := 0; i < b.N; i += 1 {
+		r := pluck(o, "test.thing.here.today.is.awesome.with.thestuff")
+		if r != "no dice" {
+			b.Errorf("fail bench, val was %s", r)
 		}
 	}
 }
