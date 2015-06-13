@@ -10,7 +10,7 @@ go get github.com/hopkinsth/go-ruler
 
 ## Introduction
 
-go-ruler is a reimplementaion of [ruler](https://github.com/RedVentures/ruler) in go, partly as an experiment, eventually as an optimization strategy. go-ruler does not yet support programmatically composing rules with function calls like ruler does and exists primarily for processing rules described arrays of JSON objects with this structure:
+go-ruler is an implementaion of [ruler](https://github.com/RedVentures/ruler) in go, partly as an experiment, eventually as an optimization strategy. go-ruler supports programmatically constructing rules in a way similar to js-ruler and can also process rules stored in arrays of JSON objects with this structure:
 
 ```json
 {
@@ -48,3 +48,12 @@ func main() {
   fmt.Println(result == true)
 }
 ```
+
+## License
+Copyright 2015 Thomas Hopkins
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License. You may obtain a copy of the License in the LICENSE file, or at:
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
