@@ -33,7 +33,7 @@ Each of those objects (or 'filters') describes a condition for a property on som
   func main() {
     rules := []byte(`[
       {"comparator": "eq", "path": "library.name", "value": "go-ruler"},
-      {"comparator": "gt", "path": "library.age", "value": 0.5},
+      {"comparator": "gt", "path": "library.age", "value": 0.5}
     ]`)
 
     engine, _ := NewRulerWithJson(rules)
