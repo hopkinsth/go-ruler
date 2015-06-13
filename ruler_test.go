@@ -300,3 +300,134 @@ func TestNewRulerWithJson(t *testing.T) {
 		t.Error("newRulerWithJson didn't do something properly!")
 	}
 }
+
+func BenchmarkNewRulerWithJson(b *testing.B) {
+	theJson := []byte(`[
+			{"comparator": "eq", "path": "name", "value": "Thomas"}
+		]
+	`)
+	data := map[string]interface{}{
+		"name": "Thomas",
+	}
+
+	for i := 0; i < b.N; i += 1 {
+		r, err := NewRulerWithJson(theJson)
+		if err != nil {
+			b.Errorf("Error getting new ruler w/json: %s", err)
+		}
+
+		if !r.Test(data) {
+			b.Error("newRulerWithJson didn't do something properly!")
+		}
+	}
+}
+
+func BenchmarkNewRulerWithFiltersSimple(b *testing.B) {
+	filters := []*Filter{
+		&Filter{
+			Comparator: "eq",
+			Path:       "name",
+			Value:      "Bob",
+		},
+	}
+
+	data := map[string]interface{}{
+		"name": "Bob",
+	}
+
+	for i := 0; i < b.N; i += 1 {
+		r := NewRuler(&filters)
+
+		if !r.Test(data) {
+			b.Error("NewRuler didn't do something properly!")
+		}
+	}
+}
+
+func BenchmarkNewRulerWithFiltersTen(b *testing.B) {
+	filters := []*Filter{
+		&Filter{
+			Comparator: "eq",
+			Path:       "name",
+			Value:      "Bob",
+		},
+		&Filter{
+			Comparator: "ncontains",
+			Path:       "name",
+			Value:      "Jones",
+		},
+		&Filter{
+			Comparator: "contains",
+			Path:       "location.name",
+			Value:      "Florida",
+		},
+		&Filter{
+			Comparator: "gte",
+			Path:       "location.x",
+			Value:      45.63,
+		},
+		&Filter{
+			Comparator: "lte",
+			Path:       "location.y",
+			Value:      35.10,
+		},
+		&Filter{
+			Comparator: "gt",
+			Path:       "location.pop",
+			Value:      100000,
+		},
+		&Filter{
+			Comparator: "lt",
+			Path:       "location.elev",
+			Value:      1000,
+		},
+		&Filter{
+			Comparator: "eq",
+			Path:       "location.extra.fips",
+			Value:      "12-24000",
+		},
+		&Filter{
+			Comparator: "eq",
+			Path:       "location.extra.time.zone",
+			Value:      "America/New_York",
+		},
+		&Filter{
+			Comparator: "eq",
+			Path:       "location.extra.time.speed.you-made-it-this-far.reward",
+			Value:      "you",
+		},
+	}
+
+	data := map[string]interface{}{
+		"name": "Bob",
+		"location": map[string]interface{}{
+			"name": "Fort Lauderdale, Florida",
+			"x":    93.23,
+			"y":    22.32,
+			"pop":  324234234,
+			"elev": 72,
+			"extra": map[string]interface{}{
+				"fips": "12-24000",
+				"time": map[string]interface{}{
+					"zone":  "America/New_York",
+					"isDst": "maybe",
+					"speed": map[string]interface{}{
+						"you-made-it-this-far": map[string]interface{}{
+							"so":     "now",
+							"we":     "will",
+							"reward": "you",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for i := 0; i < b.N; i += 1 {
+		r := NewRuler(&filters)
+
+		if !r.Test(data) {
+			b.Error("NewRuler didn't do something properly!")
+		}
+	}
+}
