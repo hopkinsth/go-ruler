@@ -55,17 +55,28 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 	for _, f := range r.filters {
 		val := pluck(o, f.Path)
 
-		// both the actual and expected value must be comparable
-		a := reflect.TypeOf(val)
-		e := reflect.TypeOf(f.Value)
+		if val != nil {
+			// both the actual and expected value must be comparable
+			a := reflect.TypeOf(val)
+			e := reflect.TypeOf(f.Value)
 
-		if !a.Comparable() || !e.Comparable() {
+			if !a.Comparable() || !e.Comparable() {
+				return false
+			}
+
+			if !r.Compare(f, val) {
+				return false
+			}
+		} else if val == nil && (f.Comparator == "exists" || f.Comparator == "nexists") {
+			// either one of these can be done
+			return r.Compare(f, val)
+		} else {
+			ruleDebug("did not find property (%s) on map", f.Path)
+			// if we couldn't find the value on the map
+			// and the comparator isn't exists/nexists, this fails
 			return false
 		}
 
-		if !r.Compare(f, val) {
-			return false
-		}
 	}
 
 	return true
