@@ -218,7 +218,7 @@ func (r *Ruler) CompareRegexp(actual, expected interface{}) bool {
 }
 
 // given a map, pull a property from it at some deeply nested depth
-// this reimplements JS `pluck` in go: https://github.com/gjohnson/pluck
+// this reimplements (most of) JS `pluck` in go: https://github.com/gjohnson/pluck
 func pluck(o map[string]interface{}, path string) interface{} {
 	// support dots for now ebcause thats all we need
 	parts := strings.Split(path, ".")
