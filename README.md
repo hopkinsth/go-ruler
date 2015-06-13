@@ -25,26 +25,26 @@ Each of those objects (or 'filters') describes a condition for a property on som
 ## Example
 
 ```go
-  package main
+package main
 
-  import "github.com/hopkinsth/go-ruler"
-  import "fmt"
+import "github.com/hopkinsth/go-ruler"
+import "fmt"
 
-  func main() {
-    rules := []byte(`[
-      {"comparator": "eq", "path": "library.name", "value": "go-ruler"},
-      {"comparator": "gt", "path": "library.age", "value": 0.5}
-    ]`)
+func main() {
+  rules := []byte(`[
+    {"comparator": "eq", "path": "library.name", "value": "go-ruler"},
+    {"comparator": "gt", "path": "library.age", "value": 0.5}
+  ]`)
 
-    engine, _ := NewRulerWithJson(rules)
+  engine, _ := ruler.NewRulerWithJson(rules)
 
-    result := engine.Test(map[string]interface{}{
-      "library": map[string]interface{}{
-        "name": "go-ruler",
-        "age": 1.24,
-      }
-    })
+  result := engine.Test(map[string]interface{}{
+    "library": map[string]interface{}{
+      "name": "go-ruler",
+      "age":  1.24,
+    },
+  })
 
-    fmt.Println(result == true)
-  }
+  fmt.Println(result == true)
+}
 ```
