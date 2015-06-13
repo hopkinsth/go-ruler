@@ -68,6 +68,8 @@ func (r *Ruler) Rule(path string) *RulerRule {
 		nil,
 	}
 
+	r.rules = append(r.rules, rule)
+
 	return &RulerRule{
 		r,
 		rule,
