@@ -119,7 +119,7 @@ func TestRules(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		r := &Rule{
+		r := &Ruler{
 			filters: c.filters,
 		}
 
