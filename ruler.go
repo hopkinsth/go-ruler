@@ -10,20 +10,22 @@ import (
 
 var ruleDebug = debug.Debug("ruler:rule")
 
-type Filter struct {
-	Comparator string
-	Path       string
-	Value      interface{}
-}
-
 // we'll use these values
 // to avoid passing strings to our
 // special comparison func for these comparators
 const (
-	gt  = iota
-	gte = iota
-	lt  = iota
-	lte = iota
+	eq        = iota
+	neq       = iota
+	gt        = iota
+	gte       = iota
+	lt        = iota
+	lte       = iota
+	exists    = iota
+	nexists   = iota
+	regex     = iota
+	matches   = iota
+	contains  = iota
+	ncontains = iota
 )
 
 type Ruler struct {
@@ -49,6 +51,20 @@ func NewRulerWithJson(jsonstr []byte) (*Ruler, error) {
 	}
 
 	return NewRuler(filters), nil
+}
+
+// begins chaining of rules
+func (r *Ruler) Rule(path string) *RulerFilter {
+	filter := &Filter{
+		"",
+		path,
+		nil,
+	}
+
+	return &RulerFilter{
+		r,
+		filter,
+	}
 }
 
 func (r *Ruler) Test(o map[string]interface{}) bool {
