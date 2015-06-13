@@ -5,13 +5,13 @@ import "testing"
 func TestRules(t *testing.T) {
 
 	cases := []struct {
-		filters []*Filter
-		o       map[string]interface{}
-		name    string
+		rules []*Rule
+		o     map[string]interface{}
+		name  string
 	}{
 		{
-			[]*Filter{
-				&Filter{
+			[]*Rule{
+				&Rule{
 					"eq",
 					"basic.property",
 					"foobar",
@@ -26,8 +26,8 @@ func TestRules(t *testing.T) {
 			"testing basic property equality (string)",
 		},
 		{
-			[]*Filter{
-				&Filter{
+			[]*Rule{
+				&Rule{
 					"eq",
 					"basic.property",
 					12,
@@ -41,8 +41,8 @@ func TestRules(t *testing.T) {
 			"testing basic property equality (int)",
 		},
 		{
-			[]*Filter{
-				&Filter{
+			[]*Rule{
+				&Rule{
 					"gt",
 					"basic.property",
 					45,
@@ -56,8 +56,8 @@ func TestRules(t *testing.T) {
 			"testing greater than (int)",
 		},
 		{
-			[]*Filter{
-				&Filter{
+			[]*Rule{
+				&Rule{
 					"gte",
 					"basic.property",
 					100,
@@ -71,8 +71,8 @@ func TestRules(t *testing.T) {
 			"testing greater than or equal to (int)",
 		},
 		{
-			[]*Filter{
-				&Filter{
+			[]*Rule{
+				&Rule{
 					"lt",
 					"basic.property",
 					45,
@@ -86,8 +86,8 @@ func TestRules(t *testing.T) {
 			"testing less than (int)",
 		},
 		{
-			[]*Filter{
-				&Filter{
+			[]*Rule{
+				&Rule{
 					"lte",
 					"basic.property",
 					45,
@@ -102,8 +102,8 @@ func TestRules(t *testing.T) {
 		},
 
 		{
-			[]*Filter{
-				&Filter{
+			[]*Rule{
+				&Rule{
 					"regex",
 					"basic.property",
 					"a[0-9]*b",
@@ -120,13 +120,13 @@ func TestRules(t *testing.T) {
 
 	for _, c := range cases {
 		r := &Ruler{
-			filters: c.filters,
+			rules: c.rules,
 		}
 
 		if !r.Test(c.o) {
-			t.Errorf("rule test failed! %s\n filters: %s",
+			t.Errorf("rule test failed! %s\n rules: %s",
 				c.name,
-				c.filters,
+				c.rules,
 			)
 		}
 	}
@@ -322,9 +322,9 @@ func BenchmarkNewRulerWithJson(b *testing.B) {
 	}
 }
 
-func BenchmarkNewRulerWithFiltersSimple(b *testing.B) {
-	filters := []*Filter{
-		&Filter{
+func BenchmarkNewRulerWithRulesSimple(b *testing.B) {
+	filters := []*Rule{
+		&Rule{
 			Comparator: "eq",
 			Path:       "name",
 			Value:      "Bob",
@@ -344,54 +344,54 @@ func BenchmarkNewRulerWithFiltersSimple(b *testing.B) {
 	}
 }
 
-func BenchmarkNewRulerWithFiltersTen(b *testing.B) {
-	filters := []*Filter{
-		&Filter{
+func BenchmarkNewRulerWithRulesTen(b *testing.B) {
+	filters := []*Rule{
+		&Rule{
 			Comparator: "eq",
 			Path:       "name",
 			Value:      "Bob",
 		},
-		&Filter{
+		&Rule{
 			Comparator: "ncontains",
 			Path:       "name",
 			Value:      "Jones",
 		},
-		&Filter{
+		&Rule{
 			Comparator: "contains",
 			Path:       "location.name",
 			Value:      "Florida",
 		},
-		&Filter{
+		&Rule{
 			Comparator: "gte",
 			Path:       "location.x",
 			Value:      45.63,
 		},
-		&Filter{
+		&Rule{
 			Comparator: "lte",
 			Path:       "location.y",
 			Value:      35.10,
 		},
-		&Filter{
+		&Rule{
 			Comparator: "gt",
 			Path:       "location.pop",
 			Value:      100000,
 		},
-		&Filter{
+		&Rule{
 			Comparator: "lt",
 			Path:       "location.elev",
 			Value:      1000,
 		},
-		&Filter{
+		&Rule{
 			Comparator: "eq",
 			Path:       "location.extra.fips",
 			Value:      "12-24000",
 		},
-		&Filter{
+		&Rule{
 			Comparator: "eq",
 			Path:       "location.extra.time.zone",
 			Value:      "America/New_York",
 		},
-		&Filter{
+		&Rule{
 			Comparator: "eq",
 			Path:       "location.extra.time.speed.you-made-it-this-far.reward",
 			Value:      "you",

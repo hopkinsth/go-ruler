@@ -29,46 +29,56 @@ const (
 )
 
 type Ruler struct {
-	filters []*Filter
+	rules []*Rule
 }
 
-func NewRuler(filters *[]*Filter) *Ruler {
-	if filters != nil {
+// creates a new Ruler for you
+// optionally accepts a pointer to a slice of filters
+// if you have filters that you want to start with
+func NewRuler(rules *[]*Rule) *Ruler {
+	if rules != nil {
 		return &Ruler{
-			*filters,
+			*rules,
 		}
 	}
 
 	return &Ruler{}
 }
 
+// returns a new ruler with filters parsed from JSON data
+// expects JSON as a slice of bytes and will parse your JSON for you!
 func NewRulerWithJson(jsonstr []byte) (*Ruler, error) {
-	var filters *[]*Filter
+	var rules *[]*Rule
 
-	err := json.Unmarshal(jsonstr, &filters)
+	err := json.Unmarshal(jsonstr, &rules)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewRuler(filters), nil
+	return NewRuler(rules), nil
 }
 
-// begins chaining of rules
-func (r *Ruler) Rule(path string) *RulerFilter {
-	filter := &Filter{
+// adds a new rule for the property at `path`
+// returns a RulerFilter that you can use to add conditions
+// and more filters
+func (r *Ruler) Rule(path string) *RulerRule {
+	rule := &Rule{
 		"",
 		path,
 		nil,
 	}
 
-	return &RulerFilter{
+	return &RulerRule{
 		r,
-		filter,
+		rule,
 	}
 }
 
+// tests all the rules (i.e. filters) in your set of rules,
+// given a map that looks like a JSON object
+// (map[string]interface{})
 func (r *Ruler) Test(o map[string]interface{}) bool {
-	for _, f := range r.filters {
+	for _, f := range r.rules {
 		val := pluck(o, f.Path)
 
 		if val != nil {
@@ -80,12 +90,12 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 				return false
 			}
 
-			if !r.Compare(f, val) {
+			if !r.compare(f, val) {
 				return false
 			}
 		} else if val == nil && (f.Comparator == "exists" || f.Comparator == "nexists") {
 			// either one of these can be done
-			return r.Compare(f, val)
+			return r.compare(f, val)
 		} else {
 			ruleDebug("did not find property (%s) on map", f.Path)
 			// if we couldn't find the value on the map
@@ -99,7 +109,7 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 }
 
 // compares real v. actual values
-func (r *Ruler) Compare(f *Filter, actual interface{}) bool {
+func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 	ruleDebug("beginning comparison")
 	expected := f.Value
 	switch f.Comparator {
@@ -110,16 +120,16 @@ func (r *Ruler) Compare(f *Filter, actual interface{}) bool {
 		return actual != expected
 
 	case "gt":
-		return r.CompareInequality(gt, actual, expected)
+		return r.inequality(gt, actual, expected)
 
 	case "gte":
-		return r.CompareInequality(gte, actual, expected)
+		return r.inequality(gte, actual, expected)
 
 	case "lt":
-		return r.CompareInequality(lt, actual, expected)
+		return r.inequality(lt, actual, expected)
 
 	case "lte":
-		return r.CompareInequality(lte, actual, expected)
+		return r.inequality(lte, actual, expected)
 
 	case "exists":
 		// not sure this makes complete sense
@@ -133,10 +143,10 @@ func (r *Ruler) Compare(f *Filter, actual interface{}) bool {
 	case "contains":
 		fallthrough
 	case "matches":
-		return r.CompareRegexp(actual, expected)
+		return r.regexp(actual, expected)
 
 	case "ncontains":
-		return !r.CompareRegexp(actual, expected)
+		return !r.regexp(actual, expected)
 	default:
 		//should probably return an error or something
 		//but this is good for now
@@ -149,7 +159,7 @@ func (r *Ruler) Compare(f *Filter, actual interface{}) bool {
 // separated in a different function because
 // we need to do another type assertion here
 // and some other acrobatics
-func (r *Ruler) CompareInequality(op int, actual, expected interface{}) bool {
+func (r *Ruler) inequality(op int, actual, expected interface{}) bool {
 	// need some variables for these deals
 	ruleDebug("entered inequality comparison")
 	var cmpStr [2]string
@@ -219,7 +229,7 @@ func (r *Ruler) CompareInequality(op int, actual, expected interface{}) bool {
 	return false
 }
 
-func (r *Ruler) CompareRegexp(actual, expected interface{}) bool {
+func (r *Ruler) regexp(actual, expected interface{}) bool {
 	ruleDebug("beginning regexp")
 	// regexps must be strings
 	var streg string

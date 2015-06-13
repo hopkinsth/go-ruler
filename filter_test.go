@@ -3,19 +3,19 @@ package ruler
 import "testing"
 
 func TestNewFilterWhenComparatorExists(t *testing.T) {
-	filter := &Filter{
+	rule := &Rule{
 		Comparator: "eq",
 		Path:       "name",
 		Value:      "Bob",
 	}
 
 	r := &Ruler{
-		filters: []*Filter{filter},
+		rules: []*Rule{rule},
 	}
 
-	rf := &RulerFilter{
+	rf := &RulerRule{
 		r,
-		filter,
+		rule,
 	}
 
 	res := rf.Gt("sup")
