@@ -22,7 +22,99 @@ func TestRules(t *testing.T) {
 					"property": "foobar",
 				},
 			},
+
 			"testing basic property equality (string)",
+		},
+		{
+			[]*Filter{
+				&Filter{
+					"eq",
+					"basic.property",
+					12,
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": 12,
+				},
+			},
+			"testing basic property equality (int)",
+		},
+		{
+			[]*Filter{
+				&Filter{
+					"gt",
+					"basic.property",
+					45,
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": 100,
+				},
+			},
+			"testing greater than (int)",
+		},
+		{
+			[]*Filter{
+				&Filter{
+					"gte",
+					"basic.property",
+					100,
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": 100,
+				},
+			},
+			"testing greater than or equal to (int)",
+		},
+		{
+			[]*Filter{
+				&Filter{
+					"lt",
+					"basic.property",
+					45,
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": 10,
+				},
+			},
+			"testing less than (int)",
+		},
+		{
+			[]*Filter{
+				&Filter{
+					"lte",
+					"basic.property",
+					45,
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": 45,
+				},
+			},
+			"testing less than or equal to (int)",
+		},
+
+		{
+			[]*Filter{
+				&Filter{
+					"regex",
+					"basic.property",
+					"a[0-9]*b",
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": "a9394b",
+				},
+			},
+			"testing regexp",
 		},
 	}
 

@@ -1,14 +1,29 @@
 package ruler
 
 import (
+	"github.com/tj/go-debug"
+	"reflect"
+	"regexp"
 	"strings"
 )
+
+var ruleDebug = debug.Debug("ruler:rule")
 
 type Filter struct {
 	Comparator string
 	Path       string
 	Value      interface{}
 }
+
+// we'll use these values
+// to avoid passing strings to our
+// special comparison func for these comparators
+const (
+	gt  = iota
+	gte = iota
+	lt  = iota
+	lte = iota
+)
 
 type Rule struct {
 	filters []*Filter
@@ -18,18 +33,166 @@ func (r *Rule) Test(o map[string]interface{}) bool {
 	for _, f := range r.filters {
 		val := pluck(o, f.Path)
 
-		switch f.Comparator {
-		case "eq":
-			return f.Value == val
-		default:
-			//should probably return an error or something
-			//but this is good for now
-			//if comparator is not implemented, return false
+		// both the actual and expected value must be comparable
+		a := reflect.TypeOf(val)
+		e := reflect.TypeOf(f.Value)
+
+		if !a.Comparable() || !e.Comparable() {
+			return false
+		}
+
+		if !r.Compare(f, val) {
 			return false
 		}
 	}
 
+	return true
+}
+
+// compares real v. actual values
+func (r *Rule) Compare(f *Filter, actual interface{}) bool {
+	ruleDebug("beginning comparison")
+	expected := f.Value
+	switch f.Comparator {
+	case "eq":
+		return actual == expected
+
+	case "neq":
+		return actual != expected
+
+	case "gt":
+		return r.CompareInequality(gt, actual, expected)
+
+	case "gte":
+		return r.CompareInequality(gte, actual, expected)
+
+	case "lt":
+		return r.CompareInequality(lt, actual, expected)
+
+	case "lte":
+		return r.CompareInequality(lte, actual, expected)
+
+	case "exists":
+		// not sure this makes complete sense
+		return actual != nil
+
+	case "nexists":
+		return actual == nil
+
+	case "regex":
+		fallthrough
+	case "contains":
+		fallthrough
+	case "matches":
+		return r.CompareRegexp(actual, expected)
+
+	case "ncontains":
+		return !r.CompareRegexp(actual, expected)
+	default:
+		//should probably return an error or something
+		//but this is good for now
+		//if comparator is not implemented, return false
+		return false
+	}
+}
+
+// runs equality comparison
+// separated in a different function because
+// we need to do another type assertion here
+// and some other acrobatics
+func (r *Rule) CompareInequality(op int, actual, expected interface{}) bool {
+	// need some variables for these deals
+	ruleDebug("entered inequality comparison")
+	var cmpStr [2]string
+	var cmpUint [2]uint64
+	var cmpInt [2]int64
+	var cmpFloat [2]float64
+
+	for idx, i := range []interface{}{actual, expected} {
+		switch t := i.(type) {
+		case uint8:
+			cmpUint[idx] = uint64(t)
+		case uint16:
+			cmpUint[idx] = uint64(t)
+		case uint32:
+			cmpUint[idx] = uint64(t)
+		case uint64:
+			cmpUint[idx] = t
+		case uint:
+			cmpUint[idx] = uint64(t)
+		case int8:
+			cmpInt[idx] = int64(t)
+		case int16:
+			cmpInt[idx] = int64(t)
+		case int32:
+			cmpInt[idx] = int64(t)
+		case int64:
+			cmpInt[idx] = t
+		case int:
+			cmpInt[idx] = int64(t)
+		case float32:
+			cmpFloat[idx] = float64(t)
+		case float64:
+			cmpFloat[idx] = t
+		case string:
+			cmpStr[idx] = t
+		default:
+			ruleDebug("invalid type for inequality comparison")
+			return false
+		}
+	}
+
+	// whichever of these works, we're happy with
+	// but if you're trying to compare a string to an int, oh well!
+	switch op {
+	case gt:
+		return cmpStr[0] > cmpStr[1] ||
+			cmpUint[0] > cmpUint[1] ||
+			cmpInt[0] > cmpInt[1] ||
+			cmpFloat[0] > cmpFloat[1]
+	case gte:
+		return cmpStr[0] >= cmpStr[1] ||
+			cmpUint[0] >= cmpUint[1] ||
+			cmpInt[0] >= cmpInt[1] ||
+			cmpFloat[0] >= cmpFloat[1]
+	case lt:
+		return cmpStr[0] < cmpStr[1] ||
+			cmpUint[0] < cmpUint[1] ||
+			cmpInt[0] < cmpInt[1] ||
+			cmpFloat[0] < cmpFloat[1]
+	case lte:
+		return cmpStr[0] <= cmpStr[1] ||
+			cmpUint[0] <= cmpUint[1] ||
+			cmpInt[0] <= cmpInt[1] ||
+			cmpFloat[0] <= cmpFloat[1]
+	}
+
 	return false
+}
+
+func (r *Rule) CompareRegexp(actual, expected interface{}) bool {
+	ruleDebug("beginning regexp")
+	// regexps must be strings
+	var streg string
+	var ok bool
+	if streg, ok = expected.(string); !ok {
+		ruleDebug("expected value not actually a string, bailing")
+		return false
+	}
+
+	var astring string
+	if astring, ok = actual.(string); !ok {
+		ruleDebug("actual value not actually a string, bailing")
+		return false
+	}
+
+	reg, err := regexp.Compile(streg)
+	if err != nil {
+		ruleDebug("regexp is bad, bailing")
+		return false
+	}
+
+	return reg.MatchString(astring)
 }
 
 // given a map, pull a property from it at some deeply nested depth
