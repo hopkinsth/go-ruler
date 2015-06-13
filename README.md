@@ -36,7 +36,16 @@ func main() {
     {"comparator": "gt", "path": "library.age", "value": 0.5}
   ]`)
 
+  // supports loading rules from JSON data
   engine, _ := ruler.NewRulerWithJson(rules)
+
+  // can also build rules programmatically
+  engine = ruler.NewRuler()
+  engine.Rule("library.name").
+    Eq("go-ruler").
+    End().
+  Rule("library.age").
+    Gt(0.5)
 
   result := engine.Test(map[string]interface{}{
     "library": map[string]interface{}{
