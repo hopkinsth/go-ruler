@@ -1,6 +1,7 @@
 package ruler
 
 import (
+	"encoding/json"
 	"github.com/tj/go-debug"
 	"reflect"
 	"regexp"
@@ -27,6 +28,27 @@ const (
 
 type Ruler struct {
 	filters []*Filter
+}
+
+func NewRuler(filters *[]*Filter) *Ruler {
+	if filters != nil {
+		return &Ruler{
+			*filters,
+		}
+	}
+
+	return &Ruler{}
+}
+
+func NewRulerWithJson(jsonstr []byte) (*Ruler, error) {
+	var filters *[]*Filter
+
+	err := json.Unmarshal(jsonstr, &filters)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewRuler(filters), nil
 }
 
 func (r *Ruler) Test(o map[string]interface{}) bool {

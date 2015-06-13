@@ -280,3 +280,23 @@ func BenchmarkPluckDeep(b *testing.B) {
 		}
 	}
 }
+
+func TestNewRulerWithJson(t *testing.T) {
+	theJson := []byte(`[
+			{"comparator": "eq", "path": "name", "value": "Thomas"}
+		]
+	`)
+
+	r, err := NewRulerWithJson(theJson)
+	if err != nil {
+		t.Errorf("Error getting new ruler w/json: %s", err)
+	}
+
+	data := map[string]interface{}{
+		"name": "Thomas",
+	}
+
+	if !r.Test(data) {
+		t.Error("newRulerWithJson didn't do something properly!")
+	}
+}
