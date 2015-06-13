@@ -70,6 +70,12 @@ func (rf *RulerRule) NotMatches(value interface{}) *RulerRule {
 	return rf.compare(ncontains, value)
 }
 
+// Stops chaining for the current rule, allowing you
+// to add rules for other properties
+func (rf *RulerRule) End() *Ruler {
+	return rf.Ruler
+}
+
 // comparator will either create a new ruler filter and add its filter
 func (rf *RulerRule) compare(comp int, value interface{}) *RulerRule {
 	var comparator string
