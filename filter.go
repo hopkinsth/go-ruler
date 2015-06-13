@@ -1,13 +1,30 @@
 package ruler
 
+/*
+This struct is the main format for rules or conditions in ruler-compatable libraries.
+Here's a sample in JSON format:
+	{
+		"comparator": "eq",
+		"path": "person.name",
+		"value": "James"
+	}
+
+Valid comparators are: eq, neq, lt, lte, gt, gte, contains (regex), ncontains (!regex)
+
+This struct is exported here so that you can include it in your own JSON encoding/decoding,
+but go-ruler has a facility to help decode your rules from JSON into its own structs.
+*/
 type Rule struct {
 	Comparator string
 	Path       string
 	Value      interface{}
 }
 
-// this is a special struct used for
-// implementing the programmatic rule building
+/*
+A RulerRule combines a single rule and a whole set of rules and is used
+when building rules programmatically through Ruler's Rule() function.
+It's not meant to be created directly.
+*/
 type RulerRule struct {
 	*Ruler
 	*Rule
@@ -48,7 +65,7 @@ func (rf *RulerRule) Matches(value interface{}) *RulerRule {
 	return rf.compare(matches, value)
 }
 
-// adds a greater than condition
+// adds a not matches condition (ncontains, in the way this thinks of it)
 func (rf *RulerRule) NotMatches(value interface{}) *RulerRule {
 	return rf.compare(ncontains, value)
 }
