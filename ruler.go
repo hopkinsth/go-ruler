@@ -153,6 +153,7 @@ func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 		//should probably return an error or something
 		//but this is good for now
 		//if comparator is not implemented, return false
+		ruleDebug("unknown comparator %s", f.Comparator)
 		return false
 	}
 }
