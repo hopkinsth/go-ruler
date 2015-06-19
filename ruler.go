@@ -35,10 +35,10 @@ type Ruler struct {
 // creates a new Ruler for you
 // optionally accepts a pointer to a slice of filters
 // if you have filters that you want to start with
-func NewRuler(rules *[]*Rule) *Ruler {
+func NewRuler(rules []*Rule) *Ruler {
 	if rules != nil {
 		return &Ruler{
-			*rules,
+			rules,
 		}
 	}
 
@@ -48,7 +48,7 @@ func NewRuler(rules *[]*Rule) *Ruler {
 // returns a new ruler with filters parsed from JSON data
 // expects JSON as a slice of bytes and will parse your JSON for you!
 func NewRulerWithJson(jsonstr []byte) (*Ruler, error) {
-	var rules *[]*Rule
+	var rules []*Rule
 
 	err := json.Unmarshal(jsonstr, &rules)
 	if err != nil {

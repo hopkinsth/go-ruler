@@ -336,7 +336,7 @@ func BenchmarkNewRulerWithRulesSimple(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i += 1 {
-		r := NewRuler(&filters)
+		r := NewRuler(filters)
 
 		if !r.Test(data) {
 			b.Error("NewRuler didn't do something properly!")
@@ -424,7 +424,7 @@ func BenchmarkNewRulerWithRulesTen(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i += 1 {
-		r := NewRuler(&filters)
+		r := NewRuler(filters)
 
 		if !r.Test(data) {
 			b.Error("NewRuler didn't do something properly!")
