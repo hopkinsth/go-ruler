@@ -98,6 +98,8 @@ func (rf *RulerRule) compare(comp int, value interface{}) *RulerRule {
 		comparator = "matches"
 	case ncontains:
 		comparator = "ncontains"
+	case stringscontains:
+		comparator = "stringscontains"
 	}
 
 	// if this thing has a comparator already, we need to make a new ruler filter
