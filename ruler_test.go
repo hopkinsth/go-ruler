@@ -100,7 +100,6 @@ func TestRules(t *testing.T) {
 			},
 			"testing less than or equal to (int)",
 		},
-
 		{
 			[]*Rule{
 				&Rule{
@@ -115,6 +114,21 @@ func TestRules(t *testing.T) {
 				},
 			},
 			"testing regexp",
+		},
+		{
+			[]*Rule{
+				&Rule{
+					"stringscontains",
+					"basic.property",
+					[]string{"p1", "p2"},
+				},
+			},
+			map[string]interface{}{
+				"basic": map[string]interface{}{
+					"property": "p1",
+				},
+			},
+			"testing stringscontains for []string",
 		},
 	}
 
