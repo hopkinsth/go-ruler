@@ -2,13 +2,14 @@ package ruler
 
 import (
 	"encoding/json"
-	"github.com/tj/go-debug"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/op/go-logging"
 )
 
-var ruleDebug = debug.Debug("ruler:rule")
+var log = logging.MustGetLogger("ruler:rule")
 
 // we'll use these values
 // to avoid passing strings to our
@@ -99,7 +100,7 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 			// either one of these can be done
 			return r.compare(f, val)
 		} else {
-			ruleDebug("did not find property (%s) on map", f.Path)
+			log.Debug("did not find property (%s) on map", f.Path)
 			// if we couldn't find the value on the map
 			// and the comparator isn't exists/nexists, this fails
 			return false
@@ -112,7 +113,7 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 
 // compares real v. actual values
 func (r *Ruler) compare(f *Rule, actual interface{}) bool {
-	ruleDebug("beginning comparison")
+	log.Debug("beginning comparison")
 	expected := f.Value
 	switch f.Comparator {
 	case "eq":
@@ -153,7 +154,7 @@ func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 		//should probably return an error or something
 		//but this is good for now
 		//if comparator is not implemented, return false
-		ruleDebug("unknown comparator %s", f.Comparator)
+		log.Debug("unknown comparator %s", f.Comparator)
 		return false
 	}
 }
@@ -164,7 +165,7 @@ func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 // and some other acrobatics
 func (r *Ruler) inequality(op int, actual, expected interface{}) bool {
 	// need some variables for these deals
-	ruleDebug("entered inequality comparison")
+	log.Debug("entered inequality comparison")
 	var cmpStr [2]string
 	var cmpUint [2]uint64
 	var cmpInt [2]int64
@@ -199,7 +200,7 @@ func (r *Ruler) inequality(op int, actual, expected interface{}) bool {
 		case string:
 			cmpStr[idx] = t
 		default:
-			ruleDebug("invalid type for inequality comparison")
+			log.Debug("invalid type for inequality comparison")
 			return false
 		}
 	}
@@ -233,24 +234,24 @@ func (r *Ruler) inequality(op int, actual, expected interface{}) bool {
 }
 
 func (r *Ruler) regexp(actual, expected interface{}) bool {
-	ruleDebug("beginning regexp")
+	log.Debug("beginning regexp")
 	// regexps must be strings
 	var streg string
 	var ok bool
 	if streg, ok = expected.(string); !ok {
-		ruleDebug("expected value not actually a string, bailing")
+		log.Debug("expected value not actually a string, bailing")
 		return false
 	}
 
 	var astring string
 	if astring, ok = actual.(string); !ok {
-		ruleDebug("actual value not actually a string, bailing")
+		log.Debug("actual value not actually a string, bailing")
 		return false
 	}
 
 	reg, err := regexp.Compile(streg)
 	if err != nil {
-		ruleDebug("regexp is bad, bailing")
+		log.Debug("regexp is bad, bailing")
 		return false
 	}
 
