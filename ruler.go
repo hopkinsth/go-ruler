@@ -2,7 +2,7 @@ package ruler
 
 import (
 	"encoding/json"
-	"github.com/tj/go-debug"
+	"github.com/visionmedia/go-debug"
 	"reflect"
 	"regexp"
 	"strings"
