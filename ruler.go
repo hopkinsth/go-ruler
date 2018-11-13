@@ -14,18 +14,19 @@ var ruleDebug = debug.Debug("ruler:rule")
 // to avoid passing strings to our
 // special comparison func for these comparators
 const (
-	eq        = iota
-	neq       = iota
-	gt        = iota
-	gte       = iota
-	lt        = iota
-	lte       = iota
-	exists    = iota
-	nexists   = iota
-	regex     = iota
-	matches   = iota
-	contains  = iota
-	ncontains = iota
+	eq              = iota
+	neq             = iota
+	gt              = iota
+	gte             = iota
+	lt              = iota
+	lte             = iota
+	exists          = iota
+	nexists         = iota
+	regex           = iota
+	matches         = iota
+	contains        = iota
+	ncontains       = iota
+	stringscontains = iota
 )
 
 type Ruler struct {
@@ -87,8 +88,8 @@ func (r *Ruler) Test(o map[string]interface{}) bool {
 			// both the actual and expected value must be comparable
 			a := reflect.TypeOf(val)
 			e := reflect.TypeOf(f.Value)
-
-			if !a.Comparable() || !e.Comparable() {
+			fVal := reflect.ValueOf(f.Value)
+			if !a.Comparable() || (!e.Comparable() && fVal.Kind() != reflect.Slice) {
 				return false
 			}
 
@@ -149,6 +150,29 @@ func (r *Ruler) compare(f *Rule, actual interface{}) bool {
 
 	case "ncontains":
 		return !r.regexp(actual, expected)
+
+	case "stringscontains":
+		ret := false
+		slice := reflect.ValueOf(expected)
+		if slice.Kind() != reflect.Slice {
+			return false
+		}
+		aVal := reflect.ValueOf(actual)
+		if aVal.Kind() != reflect.String {
+			return false
+		}
+		for i := 0; i < slice.Len(); i++ {
+			eVal := slice.Index(i)
+			if eVal.Kind() == reflect.Interface {
+				eVal = eVal.Elem()
+			}
+			if eVal.Kind() != reflect.String {
+				return false
+			}
+			ret = ret || (eVal.String() == aVal.String())
+		}
+		return ret
+
 	default:
 		//should probably return an error or something
 		//but this is good for now
